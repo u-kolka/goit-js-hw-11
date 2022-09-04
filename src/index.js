@@ -8,6 +8,7 @@ const form = document.querySelector('.search-form');
 const inputEl = document.querySelector('.search-form input');
 const galleryEl = document.querySelector('.gallery');
 const buttonLoadEl = document.querySelector('.load-more');
+
 buttonLoadEl.classList.remove('load-more')
 
 form.addEventListener('submit', searchImage);
@@ -16,23 +17,31 @@ buttonLoadEl.addEventListener('click', onLoadMore);
 
 let page = 1;
 let query = '';
-let showLightbox = new SimpleLightbox('.gallery a', { captionDelay: 200 });
+let repeatQuery = null;
+let showLightbox = null;
+
 
 function onClickGallery(event) {
   event.preventDefault();
-
   if (event.target.nodeName !== 'IMG') {
     return;
   }
 }
 
-
-
 function searchImage(e) {
-    e.preventDefault();
-    query = form.elements.searchQuery.value.trim();
-    console.log(query);
-  
+  e.preventDefault();
+  repeatQuery = query;
+  query = form.elements.searchQuery.value.trim();
+     
+  if (query === '') {
+    Notiflix.Notify.info('Please enter a word to search.');
+    return;
+  }
+  if (query === repeatQuery) {
+    Notiflix.Notify.info('Please enter a new word to search.');
+    return;
+  }
+
     fetchImages(query, page).then(images => {
     if (images.data.total === 0) {
       Notiflix.Notify.failure(
@@ -43,28 +52,29 @@ function searchImage(e) {
     if (images.data.totalHits > 40) {
       buttonLoadEl.removeAttribute('hidden');
       buttonLoadEl.classList.add('load-more')
-    }
+      }
+      
     Notiflix.Notify.success(`Hooray! We found ${images.data.totalHits} images.`);
     galleryEl.innerHTML = '';
-    createGallaryMarkup(images.data);
+      createGallaryMarkup(images.data);
+      showLightbox = new SimpleLightbox('.gallery a', { captionDelay: 250 });
     });
- 
 };
 
 function onLoadMore() {
   page += 1;
   console.log(page);
-
+  showLightbox.refresh();
   fetchImages(query, page).then(images => {
     if (Math.floor(images.data.totalHits / 40) < page) {
       Notiflix.Notify.info(
         'We are sorry, but you have reached the end of search results.'
       );
-      galleryEl.insertAdjacentHTML('beforeend', createGallaryMarkup(images.data));
+      createGallaryMarkup(images.data);
       return;
     }
-    galleryEl.insertAdjacentHTML('beforeend', createGallaryMarkup(images.data));
-    showLightbox.refresh();
+    createGallaryMarkup(images.data);
+    showLightbox = new SimpleLightbox('.gallery a', { captionDelay: 250 });
 
     const { height: cardHeight } = document
   .querySelector(".gallery")
@@ -77,7 +87,6 @@ function onLoadMore() {
 
 
 function createGallaryMarkup(data) {
-
   const markup = data.hits
     .map(el => {
       return `<div class="photo-card">
