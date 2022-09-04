@@ -9,7 +9,8 @@ body {
     margin-bottom: 20px;
     padding: 10px;
     background-color: slateblue;
-
+    position: fixed;
+    width: 100%;
 }
 
 .search-form input {
@@ -37,7 +38,7 @@ body {
     justify-content: center;
     align-items: baseline;
     gap: 20px;
-    padding: 0 20px;
+    padding: 80px 20px 0;
 }
 
 .photo-card_img {
