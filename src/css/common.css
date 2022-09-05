@@ -32,6 +32,10 @@ body {
     margin: 10px auto;
 }
 
+.hidden {
+    display: none;
+}
+
 .gallery {
     display: flex;
     flex-wrap: wrap;
